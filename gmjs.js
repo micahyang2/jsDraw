@@ -35,11 +35,28 @@ class DrawFn {
         this.ctx.arc(x, y, radius, 0, Math.PI * 2);
         this.applyStyles();
     }
+    ellipse(x, y, w, h) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, w, h, 0, 360);
+        this.applyStyles();
+    }
     line(x1, y1, x2, y2) {
         this.ctx.beginPath();
         this.ctx.moveTo(x1, y1);
         this.ctx.lineTo(x2, y2);
         this.applyStyles(true); // Only stroke for lines
+    }
+    polygon(x, y, radius, sides) {
+        const angle = Math.PI * 2 / sides;
+        this.ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+            const nx = x + radius * Math.cos(i * angle);
+            const ny = y + radius * Math.sin(i * angle);
+            if (i === 0) this.ctx.moveTo(nx, ny);
+            else this.ctx.lineTo(nx, ny);
+        }
+        this.ctx.closePath();
+        this.applyStyles();
     }
     // Text drawing function
     text(txt, x, y) {
@@ -48,6 +65,18 @@ class DrawFn {
         this.applyTextStyles();
         if (this.fillColor !== null) this.ctx.fillText(txt, x, y);
         if (this.strokeColor !== null) this.ctx.strokeText(txt, x, y);
+    }
+    bezierCurve(cp1x, cp1y, cp2x, cp2y, x, y) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(cp1x, cp1y);
+    this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+    this.applyStyles();
+    }
+    quadraticCurve(cp1x, cp1y, x, y) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(cp1x, cp1y);
+        this.ctx.quadraticCurveTo(cp1x, cp1y, x, y);
+        this.applyStyles();
     }
     background(r, g, b, a = 255) {
         this.ctx.beginPath();
@@ -58,6 +87,17 @@ class DrawFn {
     clear() {
         this.ctx.clearRect(0, 0, this.width, this.height);
     }
+
+    // Image and pixels
+    setPixel(x, y, r, g, b, a = 255) {
+        const imageData = this.ctx.createImageData(1, 1);
+        imageData.data[0] = r;
+        imageData.data[1] = g;
+        imageData.data[2] = b;
+        imageData.data[3] = a;
+        this.ctx.putImageData(imageData, x, y);
+    }
+    
 
     // Style functions
     fill(r, g, b, a = 255) {
@@ -85,12 +125,41 @@ class DrawFn {
         this.textBaseline = baseline;
     }
 
+    // Transformation functions
+    scale(w, h) {
+        if (h === undefined) {
+            this.ctx.scale(w, w);
+    		return;
+        }
+        this.ctx.scale(w, h);
+    }
+    translate(x, y) {
+        this.ctx.translate(x, y);
+    }
+    rotate(angle) {
+        // Input should be in radians
+        this.ctx.rotate(angle);
+    }
+    // In case I forget...
+    pushMatrix() {
+        this.ctx.save();
+    }
+    popMatrix() {
+        this.ctx.restore();
+    }
+
     // Utility functions
     getKeys() {
         return this.keys;
     }
     getMouse() {
         return this.mouse;
+    }
+    radians(deg) {
+        return deg * Math.PI / 180;
+    }
+    degrees(rad) {
+        return rad * 180 / Math.PI;
     }
     // Apply fill and stroke styles
     applyStyles(strokeOnly = false) {
@@ -260,7 +329,7 @@ class Surface {
     getMousePos(surface) {
         const ratioX = surface.width / this.width;
         const ratioY = surface.height / this.height;
-        return { x : surface.mouse.x / ratioX, y : surface.mouse.y / ratioY}
+        return { x : Math.round(surface.mouse.x / ratioX), y : Math.round(surface.mouse.y / ratioY)}
     }
 }
 
