@@ -40,7 +40,7 @@ function decodeRow(row) {
 };
 
 // Applying RLE to a bitmap array
-function compBitmap(bitmap) {
+export function compBitmap(bitmap) {
     const result = [];
     let repeatCount = 1;
 
@@ -61,7 +61,7 @@ function compBitmap(bitmap) {
 };
 
 // Decompress from a compressed string into a bitmap
-function decompBitmap(compressed) {
+export function decompBitmap(compressed) {
     const result = [];
     const rows = compressed.split("/");
 
@@ -100,7 +100,7 @@ function parseRgba(rgba) {
 }
 
 
-function loadBitmap(bitmap, colors, pixelSize = 2) {
+export function loadBitmap(bitmap, colors, pixelSize = 2) {
     if (typeof bitmap === 'string') {
         bitmap = decompBitmap(bitmap);
     }
@@ -138,7 +138,7 @@ const filters = {
     },
 };
 
-function imageFilter(canvas, type, modifier = "rgba(0, 0, 0, 255)") {
+export function imageFilter(canvas, type, modifier = "rgba(0, 0, 0, 255)") {
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -163,5 +163,3 @@ function imageFilter(canvas, type, modifier = "rgba(0, 0, 0, 255)") {
 
     return newCanvas;
 }
-
-export { loadBitmap, imageFilter, decompBitmap, compBitmap };
